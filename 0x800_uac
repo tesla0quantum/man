@@ -1,0 +1,19 @@
+!!! KORISNICKI RACUNI
+----------------------------
+
+* kreiranje korisnika
+useradd korisnicko_ime
+passwd korisnicko_ime
+
+
+* kreiranje grupa
+groupadd ime_grupe
+
+* dodavanje korisnika u grupe
+usermod -G ime_grupe korisnicko_ime
+
+* provjera
+cat /etc/group
+
+* alternativna provjera
+id korisnicko_ime

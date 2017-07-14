@@ -1,0 +1,39 @@
+!!! DISKOVI
+--------------------------------------------
+
+* status diskova i particija
+lsblk
+
+* kreiranje particija
+parted -s /dev/vdb -- mklabel gpt \ mkpart primary 0MiB 500MiB \ mkpart primary 500MiB 1000MiB
+parted -s /dev/vdc -- mklabel gpt \ mkpart primary 0MiB 500MiB \ mkpart primary 500MiB 1000MiB
+
+* formiranje datotecnih sustava
+mkfs.ext4 /dev/vdb1
+mkfs.ext3 /dev/vdb2
+mkfs.ext2 /dev/vdc1
+mkswap /dev/vdc2
+
+*** provjera: blkid
+
+* kreiranje root mapa
+mkdir /ext4 /ext3 /ext2
+ls -ald /ext*
+
+* dodavanje u fstab (osiguravanje mountanja prilikom reboot-a)
+echo "/dev/vdb1 /ext4 ext4 defaults 0 2" >> /etc/fstab
+echo "/dev/vdb2 /ext3 ext3 defaults 0 2">> /etc/fstab
+echo "/dev/vdc1 /ext2 ext2 defaults 0 2" >> /etc/fstab
+echo "/dev/vdc2 none swap defaults 0 0" >> /etc/fstab
+
+* mountanje
+mount -a
+
+* provjera mountanih diskova
+mount|grep vdb
+mount|grep vdc
+cat /proc/swaps
+
+* montiranje swap particije
+swapon -a
+cat /proc/swaps

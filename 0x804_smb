@@ -1,0 +1,61 @@
+!!! SAMBA
+---------------------------------------------------------
+yum install samba samba-client
+
+* provjera lokalnih korisnika i kreiranje samba passworda za njih
+grep ime_korisnika /etc/passwd
+grep ime_korisnika /etc/group
+smbpasswd -a ime_korisnika
+
+* dodati eventualno jos jednog bulk korisnika za kasniju probu pristupa!!!
+
+* pripremiti folder
+ls -ldZ /ext4
+chcon -t samba_share_t /ext4
+ls -ldZ /ext4
+chmod 777 /ext4
+
+* firewall
+yum install system-config-firewall-tui dbus dbus-python
+service messagebus start
+system-config-firewall-tui
+
+* editirati smb.conf
+tail -15 /etc/samba/smb.conf
+
+[ext4]
+comment = ext4 share
+path = /ext4
+printable = no
+# pretpostavljam da je ovo pisac htio reci:
+# share je vidljiv:
+public = yes
+# ALI SAMO mu smiju pristupiti obje grupe studenata, po default-u je read-only ALI grupa zavrsni SMIJE pisati
+writable = no
+valid users = @zavrsni, @diplomski
+write list = @zavrsni
+
+* upaliti SAMBA servise i postaviti ih permanentno upaljene
+/etc/init.d/smb status
+/etc/init.d/smb start
+/etc/init.d/nmb start
+chkconfig smb on
+chkconfig nmb on
+chkconfig |grep [sn]mb
+
+* provjera da li je share svima vidljiv u mrezi
+smbclient -L \\\\CENTOS -U guest
+
+* provjera da se korisnici koji nisu u definiranim grupama ne mogu spojiti
+smbclient \\\\CENTOS\\ext4 -U bulk_user
+
+* provjera pisanja
+smbclient \\\\CENTOS\\ext4 -U student1
+put neki_file
+dir
+
+* provjera samo citanja
+smbclient \\\\CENTOS\\ext4 -U student2
+put neki_file
+dir
+get neki_file

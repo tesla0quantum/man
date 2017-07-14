@@ -1,0 +1,39 @@
+!!! NFS
+--------------------------------------------------
+rpm -qa|grep -i nfs
+
+* instalacija
+yum install -y nfs-utils
+
+* konfiguracija
+mkdir -p /media/bla
+ls -ald /media/bla/
+printf "/media/bla\t10.0.0.0/24(rw,sync,no_root_squash)\n">>/etc/exports
+cat /etc/exports
+
+* startanje NFS servisa
+service nfs start
+
+* ukoliko ne radi NFS potrebno je startati RPCBIND
+/etc/init.d/rpcbind start
+service nfs start
+exportfs -v
+
+* mount
+mount -t nfs 10.0.0.114:/media/bla/ /mnt/
+mount|grep nfs
+
+* provjera
+cd /mnt/
+echo test123>>test
+ls -al
+cat /media/bla/test
+
+*** nano /etc/exports
+/media/bla 192.168.1.0(sync)
+
+service nfs restart
+exportfs -r
+
+*** provjera
+showmount -e localhost

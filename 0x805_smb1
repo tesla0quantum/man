@@ -1,0 +1,22 @@
+!!! SAMBA (ukratko)
+--------------------------------------------------------
+yum install –y samba-*
+nano /etc/samba/smb.conf
+[myshare]
+Path = /ext4
+Public =yes
+Writable=no
+Readable=no
+Read list=student1, student2, student3, student4
+Browsable=yes
+Valid users=student1, student2, student3, student4
+Adduser korisnik1(2,3,4)
+Smbpsswd –a korisnik1(2,3,4)
+Chmod 777 /ext4
+Iskljucit firewall
+Setenforce 0
+service smb restart
+connect to server -> windows share
+Server:localhost
+Share:myshare
+User name:student1

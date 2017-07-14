@@ -1,0 +1,232 @@
+CENTOS
+*****************************************************************
+
+!!! KORISNICKI RACUNI
+----------------------------
+
+* kreiranje korisnika
+useradd korisnicko_ime
+passwd korisnicko_ime
+
+
+* kreiranje grupa
+groupadd ime_grupe
+
+* dodavanje korisnika u grupe
+usermod -G ime_grupe korisnicko_ime
+
+* provjera
+cat /etc/group
+
+* alternativna provjera
+id korisnicko_ime
+
+!!! VIRTUALNI MREZNI ADAPTERI
+-------------------------------
+
+* dodavanje virtualnog mreznog adaptera
+nano /etc/sysconfig/network-scripts/ifcfg-eth1:0
+
+DEVICE=eth1:0
+IPADDR=172.16.1.15
+NETMASK=255.255.0.0
+ONBOOT=yes
+BOOTPROTO=static
+
+* alternativno dodavanje virtualnog mreznog adaptera
+system-config-network-tui
+
+* provjera
+cat /etc/sysconfig/network-scripts/ifcfg-eth1:0
+
+* podizanje novog adaptera
+ifup eth1:0
+ip addr show dev eth1:0
+
+* spustanje adaptera
+ifdown eth1:0
+ip a s dev eth1:0
+
+*** lp link set eth1:0 up
+
+*** service network restart
+*** ifconfig
+
+!!! DISKOVI
+--------------------------------------------
+
+* status diskova i particija
+lsblk
+
+* kreiranje particija
+parted -s /dev/vdb -- mklabel gpt \ mkpart primary 0MiB 500MiB \ mkpart primary 500MiB 1000MiB
+parted -s /dev/vdc -- mklabel gpt \ mkpart primary 0MiB 500MiB \ mkpart primary 500MiB 1000MiB
+
+* formiranje datotecnih sustava
+mkfs.ext4 /dev/vdb1
+mkfs.ext3 /dev/vdb2
+mkfs.ext2 /dev/vdc1
+mkswap /dev/vdc2
+
+*** provjera: blkid
+
+* kreiranje root mapa
+mkdir /ext4 /ext3 /ext2
+ls -ald /ext*
+
+* dodavanje u fstab (osiguravanje mountanja prilikom reboot-a)
+echo "/dev/vdb1 /ext4 ext4 defaults 0 2" >> /etc/fstab
+echo "/dev/vdb2 /ext3 ext3 defaults 0 2">> /etc/fstab
+echo "/dev/vdc1 /ext2 ext2 defaults 0 2" >> /etc/fstab
+echo "/dev/vdc2 none swap defaults 0 0" >> /etc/fstab
+
+* mountanje
+mount -a
+
+* provjera mountanih diskova
+mount|grep vdb
+mount|grep vdc
+cat /proc/swaps
+
+* montiranje swap particije
+swapon -a
+cat /proc/swaps
+
+!!! NFS
+--------------------------------------------------
+rpm -qa|grep -i nfs
+
+* instalacija
+yum install -y nfs-utils
+
+* konfiguracija
+mkdir -p /media/bla
+ls -ald /media/bla/
+printf "/media/bla\t10.0.0.0/24(rw,sync,no_root_squash)\n">>/etc/exports
+cat /etc/exports
+
+* startanje NFS servisa
+service nfs start
+
+* ukoliko ne radi NFS potrebno je startati RPCBIND
+/etc/init.d/rpcbind start
+service nfs start
+exportfs -v
+
+* mount
+mount -t nfs 10.0.0.114:/media/bla/ /mnt/
+mount|grep nfs
+
+* provjera
+cd /mnt/
+echo test123>>test
+ls -al
+cat /media/bla/test
+
+*** nano /etc/exports
+/media/bla 192.168.1.0(sync)
+
+service nfs restart
+exportfs -r
+
+*** provjera
+showmount -e localhost
+
+!!! SAMBA
+---------------------------------------------------------
+yum install samba samba-client
+
+* provjera lokalnih korisnika i kreiranje samba passworda za njih
+grep ime_korisnika /etc/passwd
+grep ime_korisnika /etc/group
+smbpasswd -a ime_korisnika
+
+* dodati eventualno jos jednog bulk korisnika za kasniju probu pristupa!!!
+
+* pripremiti folder
+ls -ldZ /ext4
+chcon -t samba_share_t /ext4
+ls -ldZ /ext4
+chmod 777 /ext4
+
+* firewall
+yum install system-config-firewall-tui dbus dbus-python
+service messagebus start
+system-config-firewall-tui
+
+* editirati smb.conf
+tail -15 /etc/samba/smb.conf
+
+[ext4]
+comment = ext4 share
+path = /ext4
+printable = no
+# pretpostavljam da je ovo pisac htio reci:
+# share je vidljiv:
+public = yes
+# ALI SAMO mu smiju pristupiti obje grupe studenata, po default-u je read-only ALI grupa zavrsni SMIJE pisati
+writable = no
+valid users = @zavrsni, @diplomski
+write list = @zavrsni
+
+* upaliti SAMBA servise i postaviti ih permanentno upaljene
+/etc/init.d/smb status
+/etc/init.d/smb start
+/etc/init.d/nmb start
+chkconfig smb on
+chkconfig nmb on
+chkconfig |grep [sn]mb
+
+* provjera da li je share svima vidljiv u mrezi
+smbclient -L \\\\CENTOS -U guest
+
+* provjera da se korisnici koji nisu u definiranim grupama ne mogu spojiti
+smbclient \\\\CENTOS\\ext4 -U bulk_user
+
+* provjera pisanja
+smbclient \\\\CENTOS\\ext4 -U student1
+put neki_file
+dir
+
+* provjera samo citanja
+smbclient \\\\CENTOS\\ext4 -U student2
+put neki_file
+dir
+get neki_file
+
+!!! SAMBA (ukratko)
+--------------------------------------------------------
+yum install –y samba-*
+nano /etc/samba/smb.conf
+[myshare]
+Path = /ext4
+Public =yes
+Writable=no
+Readable=no
+Read list=student1, student2, student3, student4
+Browsable=yes
+Valid users=student1, student2, student3, student4
+Adduser korisnik1(2,3,4)
+Smbpsswd –a korisnik1(2,3,4)
+Chmod 777 /ext4
+Iskljucit firewall
+Setenforce 0
+service smb restart
+connect to server -> windows share
+Server:localhost
+Share:myshare
+User name:student1
+
+!!! HTTPD
+-----------------------------------------
+yum install httpd
+chkconfig httpd on
+/etc/init.d/httpd start
+
+!!! ROOT LOG-IN KROZ SSH
+-----------------------------------------
+nano /etc/ssh/sshd_config
+#Prevent root logins:
+PermitRootLogin no
+
+service sshd restart

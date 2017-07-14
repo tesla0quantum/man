@@ -1,0 +1,7 @@
+!!! ROOT LOG-IN KROZ SSH
+-----------------------------------------
+nano /etc/ssh/sshd_config
+#Prevent root logins:
+PermitRootLogin no
+
+service sshd restart
