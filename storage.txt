@@ -1,0 +1,47 @@
+Linux iSCSI target
+-----------
+- disable firewall, disable SElinux
+- within targetcli ls shows you where you need to go
+
+yum install targetcli -y
+systemctl start target
+systemctl enable target
+targetcli
+backstores/fileio create testfile /tmp/fileio 500M write_back=false
+iscsi/
+create iqn.2016-01.com.example:target
+iqn.2016-01.com.example:target/tpg1/
+luns/ create /backstores/fileio/testfile
+acls/
+create [IQN initiatora]
+
+- if needed add a specific IP of the server on the portal!
+------------------
+
+NFS / SAMBA
+---------
+yum install nfs-utils samba* -y
+
+[NFS]
+
+mkdir /nfsshare
+nano /etc/exports > /nfsshare 10.10.7.0/24(rw,sync,no_root_squash)
+systemctl enable nfs-server.service
+systemctl start nfs-server.service
+systemctl enable nmb.service
+systemctl start nmb.service
+
+[SAMBA]
+mkdir /smbshare
+chmod 777 /smbshare -R
+useradd myuser
+smbpasswd -a myuser
+nano /etc/samba/smb.conf
+-> [MyShare]
+-> comment = My Shared folder
+-> path = /smbshare
+-> valid users = myuser
+-> writable = yes
+
+systemctl enable smb.service
+systemctl start smb.service

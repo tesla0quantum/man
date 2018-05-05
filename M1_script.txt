@@ -1,0 +1,156 @@
+Types of digital data
+* Unstructured – data has no inherent structure and is usually stored as different types of files (text documents, PDFs, images, and videos)
+* Quasi-Structured – textual data with erratic formats that can be formatted with effort and software tools (clickstream)
+* Semi-Structured – textual data files with an apparent pattern, enabling analysis (spreadsheets and XML files)
+* Structured – data having a defined data model, format, structure (database)
+Key data center management processes
+* Monitoring
+* Reporting
+* Provisioning
+* Planning
+* Maintenance
+Evolution of computing platforms
+* Platform 3 – cloud, big data, mobile, social
+* Platform 2 – LAN/Internet, client/server, PC
+* Platform 1 – mainframe, minicomputer, terminals
+Types of intelligent storage systems
+* Block-based
+* File-based
+* Object-based
+* Unified
+RAID levels
+* 0 – striped set with no fault tolerance
+* 1 – disk mirroring
+* 1+0 – nested RAID
+* 3 – striped set with parallel access and dedicated parity disk (supports single disk failure)
+* 5 – striped set with independent disk access and a distributed parity (supports single disk failure)
+* 6 – striped set with independent disk access and dual distributed parity (supports dual disk failure)
+Read Operation with cache
+Read hit – read request is sent, data is found in cache, data is sent to the compute system.
+Read miss – read request is sent, data is not found in cache, data is copied to cache, data is sent to the compute system.
+
+
+
+Write Operations with cache
+Write-through cache - data is written to cache, then to storage, then the acknowledgement is sent
+Write-back cache - data is written to cache, acknowledgement is sent, data is written to storage, acknowledgement is sent.
+Cache management algorithms
+Least recently used (LRU) – discards data that have not been accessed for a long time
+Most recently used (MRU) – discards data that nave been most recently accessed
+Cache data protection
+Cache mirroring – provides protection to data against cache failure, each write to the cache is held in two different memory locations on two independent memory cards.
+Cache vaulting – provides protection to data against power failure, uncommitted data is dumped to a dedicated set of drives called vault drives
+MetaLUN
+A method to expand LUNs that require additional capacity or performance.
+* Concatenated metaLUN – provides only additional capacity but no performance, expansion is quick as data is not restriped
+* Striped metaLUN – provides capacity and performance, expansion is slow as data is restriped
+Provisioning
+* Traditional provisioning – unused capacity is allocated with the actual data (thick)
+* Virtual provisioning – unused capacity is not allocated (thin)
+LUN Masking
+A process that provides data access control by defining which LUNs a compute system can access.
+Tiering
+LUN tiering – moves entire LUN from one tier to another, does not give effective cost and performance benefits
+Sub-LUN tiering – a LUN is broken down into smaller segments and tiered at that level, provides effective cost and performance benefits
+Cache Tiering – enables creation of a large capacity secondary cache using SSDs, SSDs become secondary cache
+Server Flash – intelligent caching software and PCIe flash card, determines data that would benefit by sitting in compute system on PCIe flash
+
+
+
+
+Protocols for IP SAN
+* Internet SCSI (iSCSI)
+* Fiber Channel over IP (FCIP)
+Types of iSCSI Initiator
+* Standard NIC with software iSCSI adapter – require CPU cycles of compute system
+* TCP Offload Engine (TOE) NIC with software iSCSI adapter – TOE performs TCP/IP processing, only iSCSI software requires CPU cycles
+* iSCSI HBA – performs both iSCSI and TCP/IP processing, does not use CPU cycles
+iSCSI Connectivity
+* Native – initiator connects directly to target through network
+* Bridged – initiator attached to network, storage attached to FC SAN, iSCSI gateway provides bridging functionality
+iSCSI discovery
+* SendTargets – initiator is manually configured with the target’s network portal, sends SendTargets command, target responds with required parameters
+* Initiator Storage Name Service (iSNS) – initiator and target register themselves with iSNS server, initiator may query iSNS server for a list of available targets
+FCoE SAN
+A SAN that transports FC data along with regular ethernet traffic over CEE network. Uses FCoE protocol that encapsulates FC frames into Ethernet frames.
+Components of FCoE SAN
+* Network adapters
+* Cables
+* FCoE switch
+CNA (Converged network adapter)
+A physical adapter that provides functionality of both NIC and FC HBA. Encapsulates FC frames into Ethernet frames and forwards them over CEE links.
+Software FCoE adapter
+An OS/Hypervisor resident software that performs FCoE processing.
+FCoE switch
+Provides both Ethernet switch and FC switch functionalities. Consists of FCF, ethernet bridge, and ports for FC and ethernet connectivity.
+
+
+FCoE SAN connectivity
+* FCoE with existing FC SAN – FCoE switches interconnect a CEE network containing compute systems with an FC SAN containing storage systems
+* End-to-end FCoE – FCoE interconnect FCoE compute systems with FCoE storage systems
+VLAN and VSAN
+A dedicated VLAN is configured for each VSAN. VLANs configured for VSANs should not carry regular LAN traffic.
+CEE
+Refers to a set of enhancements to conventional ethernet for making it lossless and for converging various traffic types. Eliminates the dropping of frames due to congestion.
+CEE functionalities
+* Priority-based flow control (PFC) – creates eight virtual links on a single physical link, each link can be paused and restarted independently
+* Enhanced transmission selection (ETS) – allocates bandwidth to different traffic classes such as LAN, SAN, and Inter Process Communication. Provides available bandwidth to other classes of traffic when a class of traffic does not use its allocated bandwidth
+* Congestion notification (CN) – provides a mechanism for detecting network congestion and notifying the source. Enables a switch to send a signal to other ports that need to stop or slow down their transmissions
+* Data Center Bridging Exchange Protocol (DCBX) – enables CEE devices to convey and configure their features with other CEE devices in the network. Allows a switch to distribute configuration values to attached network adapters. Ensures consistent configuration across a network
+FCoE Initialization Protocol (FIP)
+FIP is used for discovering FCFs and establishing virtual links between FCoE nodes and FCoE switches. FIP frames do not transport FC data but contain discovery and login parameters.
+Types of SAN
+* Fiber Channel (FC) SAN
+* Internet Protocol (IP) SAN
+* Fiber Channel (FCoE) SAN
+Software-Defined Network
+Abstracts and separates control plane from data plane. Software external to the network components takes over control functions. Controller sends instructions for data plane at the network component to handle network traffic
+Benefits
+* Centralized control
+* Policy-based automation
+* Simplified, agile management
+
+FC topologies
+* Single-switch – both compute systems and storage systems connect to a single switch
+* Mesh – compute systems and storage systems can be connected to any switch
+* Core-edge – consists of edge and core switch tiers, storage is connected to core tier
+* Link aggregation – combines multiple ISLs into a single logical ISL
+Zoning
+A FC switch function that enables node ports to be logically segmented into groups and communicate with each other within the group. (WWN zoning, port zoning, mixed zoning).
+
+File sharing methods
+* File transfer protocol (FTP)
+* Peer-to-Peer (P2P)
+* Network File System (NFS) and Common internet file system (CIFS)
+* Distributed file system (DFS)
+Scale-up NAS
+Provides capability to scale capacity and performance of a single NAS system. NAS systems have a fixed capacity ceiling, performance may degrade after reaching the capacity limit.
+Scale-out NAS
+Pools multiple nodes in a cluster to work as a single NAS device. File system grows dynamically as nodes are added. Stripes data across nodes with mirror or parity protection.
+CIFS
+Open variation of SMB protocol. Maintains connection information regarding every connected client, can automatically restore connections and reopen files that were open prior to interruption.
+NFS
+Uses RPC mechanism to provide access to remote file system.
+* NFSv2 – stateless, uses UDP
+* NFSv3 – stateless, uses UDP or optionally TCP
+* NFSv4 – stateful, uses TCP
+
+
+
+
+
+
+
+Scale-out NAS I/O operation
+Write
+* Client sends a file to the NAS node
+* Node to which the client is connected receives the file
+* File is striped across the nodes
+Read
+* Client requests a file
+* Node to which the client is connected receives the request
+* The retrieves and rebuild the file and gives it to the client
+File-level virtualization
+Eliminates dependency between data accessed at the file-level and the location where the files are physically stored. Enables users to use a logical path, rather than a physical path, to access files. Provides non-disruptive file mobility across file servers or NAS devices.
+File-level storage tiering
+Moves files from higher tier to lower tier. Uses policy engine to determine the files that are required to move to the lower tier (archiving).
